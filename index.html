@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Ise and the Great Buddha: two monuments, two claims to rule</title>
+<title>The Emperor's Problem: Ise, the Great Buddha, and the Making of Authority</title>
 <style>
   :root {
     --bg: #fbfbfa; --fg: #16181d; --muted: #5c6270; --line: #d8dbe2;
@@ -341,107 +341,142 @@ function createSession(spec, options = {}) {
 
 const SPEC = {
   "meta": {
-    "title": "Ise and the Great Buddha: two monuments, two claims to rule",
-    "objective": "compare how Ise's ritual renewal and Shōmu's Great Buddha turned architecture and ritual into imperial authority",
-    "audience": "students who have read Coaldrake's 'Ise Jingu' and Shōmu's proclamation; they know Shinto, Buddhism, and the Nara court in outline",
+    "title": "The Emperor's Problem: Ise, the Great Buddha, and the Making of Authority",
+    "objective": "make the choices that turn Ise's ritual renewal and Shōmu's Great Buddha into visible claims to rule",
+    "audience": "students who have read Coaldrake's 'Ise Jingu' and Shōmu's proclamation; the exercise puts them in Shōmu's seat and asks them to make the decisions the readings explain",
     "mode": "general",
     "source": "William H. Coaldrake, 'Ise Jingu,' in Architecture and Authority in Japan (Routledge, 1996), pp. 261–274; 'Proclamation of the Emperor Shōmu on the Erection of the Great Buddha Image,' in Sources of Japanese Tradition, vol. 1 (Columbia University Press, 1958), pp. 275–277."
   },
   "steps": [
     {
-      "id": "why-rebuild",
+      "id": "renewal-order",
       "kind": "choice",
-      "prompt": "Ise is rebuilt on a roughly twenty-year cycle. Which explanation gets the causation right?",
-      "why": "This is the misconception the set is built to correct: decay is real, but it is not the whole reason.",
+      "prompt": "The renewal of Ise is due in your reign. The old shrine still stands, and the treasury is tight. What do you order?",
+      "why": "You are Shōmu, forty-fifth emperor of Japan. Ise is the shrine of Amaterasu, the sun goddess from whom your family traces its right to rule. Every twenty years the shrine is rebuilt on an adjacent site — a practice called shikinen sengu. Your advisers are waiting.",
       "difficulty": 1,
-      "hint": "Coaldrake gives three reasons, not one.",
-      "source": "Coaldrake, pp. 270–271",
+      "hint": "The building is not the only thing that is supposed to be renewed.",
+      "source": "Coaldrake, pp. 261, 264, 270–271",
       "options": [
         {
-          "id": "decay",
-          "text": "The buildings are made of wood and thatch, so decay forces a rebuild.",
+          "id": "repair",
+          "text": "Patch the roof and replace the rotten pillars. A shrine is a building, and the building is still standing.",
           "correct": false,
-          "feedback": "Decay is real — Coaldrake lists it first — but it cannot explain why the cycle is ritualized, why the state pays for it, or why the interval is twenty years rather than 'whenever the roof fails.'"
+          "feedback": "You save money this year, and the court remembers it. Coaldrake's first reason for renewal is real — cypress, thatch, and sunken pillars do decay — but repair is not the ritual. It does not transfer the god-body, it does not renew purity, and it does not let your generation sponsor the cycle that ties your rule to Amaterasu."
         },
         {
-          "id": "fused",
-          "text": "Decay, the Shinto cycle of death and rebirth, and the political need to renew imperial authority all reinforce one another.",
+          "id": "rebuild",
+          "text": "Rebuild the whole shrine on the alternate site, with the full sequence of rites.",
           "correct": true,
-          "feedback": "Yes. Coaldrake gives three reasons — architectural, religious, political — and argues that the political imperative increasingly dominated."
+          "feedback": "The order goes out. The renewal will take eight years, thirty-two major ceremonies, and about 13,600 cypress trees. You have done more than repair a building: you have renewed the god's dwelling and your own claim to rule."
         },
         {
-          "id": "all-shrines",
-          "text": "Shinto requires every shrine in Japan to be rebuilt every twenty years.",
+          "id": "move-mirror",
+          "text": "Move the sacred mirror to a Buddhist temple and let the old shrine lapse.",
           "correct": false,
-          "feedback": "No. Coaldrake notes that other shrines also had renewal programs, but their intervals varied widely; Ise's twenty-year cycle was exceptional in its regularity and imperial sponsorship."
+          "feedback": "The mirror is the physical manifestation of Amaterasu, and the inner shrine is its dwelling. Moving it into a Buddhist temple would collapse the distinction the shrine exists to make. This is the wrong kind of monument."
         },
         {
-          "id": "buddhist-rule",
-          "text": "Buddhist temple regulations required periodic reconstruction.",
+          "id": "wait",
+          "text": "Wait until the old shrine actually collapses. That is what decay means.",
           "correct": false,
-          "feedback": "Buddhism is the other half of this week's reading, not the rule behind Ise's renewal. The Shoden derives from pre-Buddhist storehouse architecture, and the renewal is a Shinto ritual."
+          "feedback": "The shrine's materials decay, but the cycle is not scheduled around failure. The twenty-year interval is a ritual and political calendar, and waiting for collapse would cede the initiative to the weather."
         }
       ]
     },
     {
-      "id": "model",
+      "id": "approach",
       "kind": "reveal",
-      "prompt": "Here is the model before you apply it.",
-      "why": "A worked model supplies the categories; the next steps ask you to use them on evidence.",
+      "prompt": "You arrive at Ise. Follow the path up.",
+      "why": "Before you decide anything else, see what the shrine asks a visitor to do.",
       "difficulty": 1,
-      "source": "Coaldrake, pp. 270–272; proclamation, pp. 276–277",
-      "reveal": "Coaldrake's three reasons: (1) architectural — cypress, thatch, and sunken pillars decay; (2) religious — rebuilding enacts the cycle of death and rebirth and restores purity; (3) political — each generation sponsors the ritual and renews its claim to rule. The argument is not that one reason is 'really' the cause. The three became fused, and the political imperative increasingly dominated. Shōmu's project is a different answer to the same problem: a 53-foot gilt-bronze Lochana Buddha, cast from the state's metal, meant to place the realm under Buddhist protection. One monument lasts by being remade; the other is meant to last by being enormous."
+      "source": "Coaldrake, pp. 262–263, 265–266",
+      "reveal": "The path leaves the Isuzu River and passes under a great torii — the open gateway that marks a sacred boundary. Cedars close in. You climb stone steps to a compound raised above the path, pass through a gatehouse with a thatched roof, and stop at a silk curtain. Beyond it, the Shoden — the main sanctuary — is hidden. You can see only the ridge of its roof and the forked finials, sheathed in gilded bronze, catching the light. Four fences and a sequence of gateways separate you from the god. This is a Shinto sanctuary: the kami, the spirits of places and forces, are thought to dwell in the cedars and rocks. Even you, the emperor, do not simply walk in. Access is the architecture."
     },
     {
-      "id": "three-reasons",
-      "kind": "classify",
-      "prompt": "Sort each piece of evidence under the reason for Ise's renewal it supports.",
-      "why": "The same practice answers three different problems at once; sorting the evidence shows how they interlock.",
+      "id": "fences",
+      "kind": "choice",
+      "prompt": "Your companion asks why the shrine needs four fences. What do you tell them?",
+      "why": "This is the part of Ise that is easiest to miss: the fences are not just security.",
       "difficulty": 2,
-      "hint": "Ask what the evidence would explain if the other two reasons disappeared.",
+      "hint": "Watch who is allowed to stand where.",
+      "source": "Coaldrake, pp. 265–267",
+      "options": [
+        {
+          "id": "weather",
+          "text": "They keep the building clean and protect it from weather.",
+          "correct": false,
+          "feedback": "The roofs and fences do protect the building, but that is not their political work. The fences rank people. Coaldrake calls the strategy 'spatial segregation and partial revelation.'"
+        },
+        {
+          "id": "rank",
+          "text": "They rank access: the closer you are allowed, the more authority you hold.",
+          "correct": true,
+          "feedback": "Yes. Coaldrake describes a graded sequence: ordinary visitors at the outer fence, local officials farther in, the imperial family through the inner gate, and the reigning emperor at the steps of the Shoden. The building is hidden so that the right to approach it can be displayed."
+        },
+        {
+          "id": "temple",
+          "text": "They mark the boundary between the shrine and the Buddhist temple next door.",
+          "correct": false,
+          "feedback": "There is no Buddhist temple next door. Ise's architecture is pre-Buddhist in origin — the Shoden derives from raised-floor rice storehouses — and the fences organize Shinto access, not a rivalry with a neighboring temple."
+        },
+        {
+          "id": "meaningless",
+          "text": "They are a later addition with no religious meaning.",
+          "correct": false,
+          "feedback": "The number of fences changed over time, but the hierarchy they create is central. Coaldrake shows how the restoration of the outer fences in 1869 was itself a political act, enhancing the emperor's dignity by distancing the inner sanctum."
+        }
+      ]
+    },
+    {
+      "id": "budget",
+      "kind": "classify",
+      "prompt": "The treasury asks for a justification. Sort each item under the reason for the renewal it supports.",
+      "why": "You are preparing the budget memorial. In Shinto, kami are the spirits of places and natural forces; the court will not accept 'because it is sacred' as a line item.",
+      "difficulty": 2,
+      "hint": "Ask what each item would explain if the other two reasons disappeared.",
       "source": "Coaldrake, pp. 264, 270–272",
-      "feedback": "Yes. The categories are not alternatives; Coaldrake's point is that they reinforce one another.",
+      "feedback": "The memorial goes through. Coaldrake's three reasons are not alternatives; they reinforce one another, and the political one increasingly dominates.",
       "buckets": [
-        "Architectural / practical",
-        "Religious",
-        "Political"
+        "The building is wearing out",
+        "The ritual must be renewed",
+        "The throne must be renewed"
       ],
       "items": [
         {
           "text": "Thatch and cypress deteriorate, and pillars set into the ground rot.",
-          "bucket": "Architectural / practical"
+          "bucket": "The building is wearing out"
         },
         {
           "text": "Rebuilding enacts the cycle of growth, decay, death, and rebirth.",
-          "bucket": "Religious"
+          "bucket": "The ritual must be renewed"
         },
         {
           "text": "Each generation sponsors the rebuilding to renew its claim to power.",
-          "bucket": "Political"
+          "bucket": "The throne must be renewed"
         },
         {
           "text": "The renewal opens with expiatory prayers to the kami of the mountain.",
-          "bucket": "Religious"
+          "bucket": "The ritual must be renewed"
         },
         {
           "text": "The twenty-year cycle was written into imperial ritual procedure.",
-          "bucket": "Political"
+          "bucket": "The throne must be renewed"
         },
         {
           "text": "The shrine's pillars are sunk directly into the earth.",
-          "bucket": "Architectural / practical"
+          "bucket": "The building is wearing out"
         }
       ]
     },
     {
-      "id": "claim-evidence",
+      "id": "evidence",
       "kind": "match",
-      "prompt": "Match each claim to the evidence Coaldrake uses to support it.",
-      "why": "The claims are easy to nod along with; the evidence is what makes them arguable.",
+      "prompt": "A young courtier asks how you know the renewal is political and not just pious. Match each claim to the evidence you would show.",
+      "why": "You are walking the courtier through the shrine. The claims are easy to nod along with; the evidence is what makes them arguable.",
       "difficulty": 2,
       "hint": "One pair is about the building's ancestry, one about access, one about the Outer Shrine, one about partial visibility, one about the meaning of monumentality.",
       "source": "Coaldrake, pp. 261, 263–269",
-      "feedback": "These are the observable details behind the argument: ancestry, access, rank, and revelation.",
+      "feedback": "The courtier writes it down. Ancestry, access, rank, and revelation: these are the observable details behind the argument.",
       "pairs": [
         {
           "left": "Monumentality can depend on renewal, not permanence.",
@@ -466,37 +501,37 @@ const SPEC = {
       ]
     },
     {
-      "id": "trees",
+      "id": "timber",
       "kind": "numeric",
-      "prompt": "One shikinen sengu consumes about how many cypress trees? Give a number.",
-      "why": "The number is part of the argument: renewal is not maintenance, it is a statewide mobilization.",
+      "prompt": "The timber office needs a number before it can send the order. About how many cypress trees will one renewal consume?",
+      "why": "You are signing the requisition. The number is part of the argument: renewal is not maintenance, it is a statewide mobilization.",
       "difficulty": 2,
       "hint": "Coaldrake gives a figure in the thirteen thousands.",
       "source": "Coaldrake, p. 264",
       "answer": 13600,
       "tolerance": 500,
-      "feedback": "About 13,600 trees, yielding some 10,000 cubic metres of timber. A single renewal draws on forests, loggers, river transport, and hereditary craft guilds — which is why imperial patronage matters."
+      "feedback": "About 13,600 trees, yielding some 10,000 cubic metres of timber. The order goes out to the Kiso valley; loggers will float the trunks down the river through its gorges. A single renewal draws on forests, transport, and hereditary craft guilds. This is what imperial patronage looks like on the ground."
     },
     {
-      "id": "renewal-order",
+      "id": "ritual",
       "kind": "order",
-      "prompt": "Put one renewal cycle in order, from the first rite to the dismantling of the old shrine.",
+      "prompt": "Before you sign, you review the sequence of the renewal. Put it in order.",
       "why": "The sequence shows that rebuilding is a ritual process, not a construction project with a ceremony attached.",
       "difficulty": 2,
       "hint": "The ritual begins in the forest, before anyone touches the building site.",
       "source": "Coaldrake, p. 264",
-      "feedback": "That is the sequence Coaldrake describes. The ritual starts in the forest, not on the building site; the transfer of the mirror is the moment the new shrine becomes the god's dwelling; dismantling follows.",
+      "feedback": "The ritual starts in the forest, not on the building site. The transfer of the mirror is the moment the new shrine becomes the god's dwelling; dismantling follows. You sign.",
       "order": [
         {
           "id": "prayers",
           "text": "Expiatory prayers are offered to the kami of the mountain where the cypress will be cut."
         },
         {
-          "id": "timber",
+          "id": "felling",
           "text": "Cypress is felled and floated down the Kiso River."
         },
         {
-          "id": "build",
+          "id": "building",
           "text": "Craftsmen build the new shrine on the Alternate Site."
         },
         {
@@ -504,96 +539,105 @@ const SPEC = {
           "text": "The sacred mirror is transferred from the old shrine to the new."
         },
         {
-          "id": "dismantle",
+          "id": "dismantling",
           "text": "The superseded buildings are dismantled."
         }
       ]
     },
     {
-      "id": "power-sentence",
+      "id": "nara",
+      "kind": "reveal",
+      "prompt": "A decade later, you are back in Nara, and the problem has changed.",
+      "why": "The shrine renews your ancestry. Now you need a monument that addresses the present — and the Buddha offers a different technology of authority.",
+      "difficulty": 2,
+      "source": "Proclamation, pp. 275–277",
+      "reveal": "It is 743. You are Shōmu, still on the throne, and the court is in Nara, the capital. Buddhism arrived from Korea and China two centuries ago, and you have encouraged it: monasteries, nunneries, and now a statue. The proclamation you are about to issue vows to cast a Lochana Buddha in gold and copper — a cosmic Buddha, not a local spirit — fifty-three feet tall and 250 tons. The image will take years to cast and gild. The temple complex that houses it will be called Tōdai-ji, the Great Eastern Temple; the eye-opening ceremony will come in 752. Ise renews a bond to the sun goddess. The Buddha will concentrate the wealth and labor of the realm into one object no one can fail to see."
+    },
+    {
+      "id": "dictation",
       "kind": "choice",
-      "prompt": "The proclamation says: 'It is We who possess the wealth of the land; it is We who possess all power in the land.' What work does that sentence do?",
-      "why": "The sentence is the hinge between Buddhist devotion and political authority; miss it and the project looks like private piety.",
+      "prompt": "You are dictating the proclamation. The court scribe waits. Which sentence do you open with?",
+      "why": "The sentence you choose tells the realm who is paying, who is benefiting, and whose authority the Buddha serves.",
       "difficulty": 2,
       "hint": "Read the next sentence: the vow to create the image follows immediately.",
       "source": "Proclamation, p. 276",
       "options": [
         {
           "id": "private",
-          "text": "It presents the Buddha as a private offering that the emperor can afford because he is rich.",
+          "text": "We, the humble servant of the Buddha, offer this statue from our private fortune.",
           "correct": false,
-          "feedback": "It does say he can afford it, but the point is the opposite of private: the wealth and power are public claims, and the project binds the realm to them."
+          "feedback": "The scribe's brush does not move. The project is too large for a private fortune, and the point is not your personal wealth. The historical proclamation claims the wealth of the land and the power of the state."
         },
         {
-          "id": "fuse",
-          "text": "It fuses the sovereign's material power with the Buddha's spiritual power, making the statue a state project.",
+          "id": "power",
+          "text": "It is We who possess the wealth of the land; it is We who possess all power in the land.",
           "correct": true,
-          "feedback": "Yes. The vow to build the image follows immediately, and the proclamation goes on to claim the nation's metal and to organize participation across the realm. Devotion is the vocabulary; state power is the infrastructure."
+          "feedback": "The brush moves. This is the sentence the historical Shōmu used. It fuses the sovereign's material power with the Buddha's spiritual power, and the vow to build the image follows immediately. Devotion is the vocabulary; state power is the infrastructure."
         },
         {
-          "id": "illegitimate",
-          "text": "It admits that the emperor has failed and has no legitimate claim to rule.",
+          "id": "command",
+          "text": "The Buddha commands the people to fund this image without complaint.",
           "correct": false,
-          "feedback": "Shōmu does confess a lack of personal virtue, but that is a Buddhist humility topos, not an abdication. The same document commands provincial officials and claims all power in the land."
+          "feedback": "That is the opposite of the proclamation's careful administration. The text tells provincial and county authorities not to harass the people with arbitrary demands. The project needs participation, not resentment."
         },
         {
-          "id": "reject",
-          "text": "It rejects the idea that the Buddha can protect the state.",
+          "id": "merit",
+          "text": "This image is for the emperor's own merit; the people need not participate.",
           "correct": false,
-          "feedback": "The opposite: the project is explicitly for peace and protection, extending the benefits to all in heaven and earth, 'even animals and plants.'"
+          "feedback": "The historical text explicitly widens the benefit to all in heaven and earth, even animals and plants, and invites even a twig or a handful of dirt as an offering. A private merit-making project would miss the political point."
         }
       ]
     },
     {
-      "id": "provisions",
+      "id": "draft",
       "kind": "multi",
-      "prompt": "Which provisions show that the proclamation is managing money, labor, and participation — not just belief? Select all that apply.",
-      "why": "Close reading: the text administers a project, and that administration is part of how it makes authority.",
+      "prompt": "The draft goes to the provinces. Which instructions do you leave in? Select all that apply.",
+      "why": "You are editing the proclamation before the seals are applied. The text is managing money, labor, and participation, not just belief.",
       "difficulty": 3,
-      "hint": "Three of these are things the proclamation actually orders or permits.",
+      "hint": "Three of these are things the historical proclamation actually orders or permits.",
       "source": "Proclamation, pp. 276–277",
       "options": [
         {
           "id": "metal",
-          "text": "It claims 'the nation's resources of metal' for the casting.",
+          "text": "Claim the nation's resources of metal for the casting.",
           "correct": true,
           "feedback": "Yes — the project consumes state metal, not private wealth."
         },
         {
           "id": "twig",
-          "text": "It says even a twig or a handful of dirt is an acceptable offering.",
+          "text": "Accept even a twig or a handful of dirt as an offering.",
           "correct": true,
           "feedback": "Yes — it widens participation, making the project a national fellowship rather than an elite donation."
         },
         {
           "id": "officials",
-          "text": "It tells provincial and county authorities not to harass the people with arbitrary demands.",
+          "text": "Tell provincial and county authorities not to harass the people with arbitrary demands.",
           "correct": true,
           "feedback": "Yes — it tries to control the labor extraction the project could otherwise unleash. That is administration, not just piety."
         },
         {
           "id": "calumny",
-          "text": "It says the Buddha's heart is touched only when the project provokes calumny and bitterness.",
+          "text": "Say the Buddha's heart is touched only when the project provokes calumny and bitterness.",
           "correct": false,
           "feedback": "The text says the opposite: the Buddha's heart would never be touched if calumny and bitterness were provoked. The sentence warns how the project must be run."
         },
         {
           "id": "household",
-          "text": "It limits the project's benefits to the imperial household.",
+          "text": "Limit the project's benefits to the imperial household.",
           "correct": false,
           "feedback": "The text explicitly extends the benefits to all in heaven and earth, even animals and plants."
         }
       ]
     },
     {
-      "id": "synthesis",
+      "id": "memorandum",
       "kind": "explain",
-      "prompt": "In 4–6 sentences: how does each project turn authority into something people can see or do, and where do the two readings disagree about what makes a monument last?",
-      "why": "This is the synthesis the two readings are paired to produce: comparison, not summary.",
+      "prompt": "That night, you dictate a private memorandum for your successor. In 4–6 sentences: how did the shrine and the statue each make your rule visible, and which one do you trust to last?",
+      "why": "This is the synthesis the two readings are paired to produce: a comparison, not a summary. Write it in your own words before you see the model.",
       "difficulty": 3,
       "hint": "Name one concrete mechanism from each reading, then state the disagreement in one sentence.",
       "source": "Coaldrake, pp. 261–274; proclamation, pp. 275–277",
-      "reveal": "Both projects make rule visible, but they disagree about what makes a monument last. At Ise, authority is renewed by repeated action: each generation rebuilds the shrine, sponsors the rituals, and passes through a graded sequence of fences and gateways. The building is not meant to survive unchanged; its power lies in the cycle, and access to the inner sanctum is itself a display of political hierarchy. Shōmu's Great Buddha takes the opposite route: it concentrates the state's wealth, metal, and labor into one enormous image, and the proclamation presents that concentration as Buddhist devotion. Yet the two are not simple opposites. Both fuse religious authority with political authority, and both depend on the ruler's control of resources and ritual. The difference is the logic of legitimation: Ise renews authority by repeating the founding act, while Tōdai-ji tries to fix it in bronze."
+      "reveal": "Both projects make rule visible, but they disagree about what makes a monument last. At Ise, authority is renewed by repeated action: each generation rebuilds the shrine, sponsors the rituals, and passes through a graded sequence of fences and gateways. The building is not meant to survive unchanged; its power lies in the cycle, and access to the inner sanctum is itself a display of political hierarchy. My Great Buddha takes the opposite route: it concentrates the state's wealth, metal, and labor into one enormous image, and my proclamation presents that concentration as Buddhist devotion. Yet the two are not simple opposites. Both fuse religious authority with political authority, and both depend on the ruler's control of resources and ritual. The difference is the logic of legitimation: Ise renews authority by repeating the founding act, while Tōdai-ji tries to fix it in bronze. The honest answer is that they last in different senses. The bronze can be damaged or forgotten; the cycle can be interrupted by war or a broken treasury. I trust the cycle more, because it makes each successor an actor in the claim rather than a caretaker of a finished object."
     }
   ]
 };

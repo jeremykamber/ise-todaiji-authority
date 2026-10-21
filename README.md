@@ -1,8 +1,6 @@
-# Ise and the Great Buddha: two monuments, two claims to rule
+# The Emperor's Problem: Ise, the Great Buddha, and the Making of Authority
 
-**Live:** https://jeremykamber.github.io/ise-todaiji-authority/
-
-compare how Ise's ritual renewal and Shōmu's Great Buddha turned architecture and ritual into imperial authority
+make the choices that turn Ise's ritual renewal and Shōmu's Great Buddha into visible claims to rule
 
 Online: open `index.html` (no install, no server) or scan `qr.png`.
 Paper: not required — the exercise is interactive by design, and the
@@ -10,9 +8,9 @@ Paper: not required — the exercise is interactive by design, and the
 
 ## What this is for
 
-- **Audience**: students who have read Coaldrake's 'Ise Jingu' and Shōmu's proclamation; they know Shinto, Buddhism, and the Nara court in outline
-- **Time**: about 11 minutes
-- **You will**: compare how Ise's ritual renewal and Shōmu's Great Buddha turned architecture and ritual into imperial authority
+- **Audience**: students who have read Coaldrake's 'Ise Jingu' and Shōmu's proclamation; the exercise puts them in Shōmu's seat and asks them to make the decisions the readings explain
+- **Time**: about 13 minutes
+- **You will**: make the choices that turn Ise's ritual renewal and Shōmu's Great Buddha into visible claims to rule
 
 ## How it works
 
