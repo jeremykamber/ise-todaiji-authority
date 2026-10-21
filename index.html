@@ -1,0 +1,856 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ise and the Great Buddha: two monuments, two claims to rule</title>
+<style>
+  :root {
+    --bg: #fbfbfa; --fg: #16181d; --muted: #5c6270; --line: #d8dbe2;
+    --card: #fff; --accent: #1b4dff; --ok: #0a6b3d; --ok-bg: #e8f5ee;
+    --no: #a3231d; --no-bg: #fdecea; --warn-bg: #fff8e5;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#14161a; --fg:#eef0f4; --muted:#9aa1ad; --line:#2c3038;
+            --card:#1b1e24; --accent:#7d9bff; --ok:#7ddba8; --ok-bg:#12301f;
+            --no:#ff9a92; --no-bg:#3a1a17; --warn-bg:#332c12; }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--fg); }
+  body {
+    font: 16px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    max-width: 46rem; margin: 0 auto; padding: 1.25rem 1.25rem 4rem;
+  }
+  header { display: flex; flex-wrap: wrap; gap: .5rem 1rem; align-items: baseline; justify-content: space-between; }
+  h1 { font-size: 1.25rem; margin: 0; }
+  .obj { color: var(--muted); font-size: .9rem; margin: .35rem 0 1rem; }
+  .bar { height: .35rem; background: var(--line); border-radius: 999px; overflow: hidden; }
+  .bar > i { display: block; height: 100%; width: 0; background: var(--accent); transition: width .2s ease; }
+  .meta { display: flex; justify-content: space-between; color: var(--muted); font-size: .8rem; margin: .4rem 0 1.5rem; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: .75rem; padding: 1.1rem 1.15rem; }
+  .prompt { font-size: 1.1rem; font-weight: 600; margin: 0 0 .2rem; }
+  .why { color: var(--muted); font-size: .85rem; margin: 0 0 1rem; }
+  button { font: inherit; color: inherit; background: var(--card); border: 1px solid var(--line);
+           border-radius: .5rem; padding: .6rem .8rem; text-align: left; cursor: pointer; }
+  button:hover:not(:disabled) { border-color: var(--accent); }
+  button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  button:disabled { cursor: default; opacity: .85; }
+  .opts { display: grid; gap: .5rem; }
+  .opts[data-multi] button::before { content: "☐ "; }
+  .opts[data-multi] button[aria-pressed="true"]::before { content: "☑ "; }
+  .opts button[aria-pressed="true"] { border-color: var(--accent); }
+  .row { display: flex; gap: .5rem; flex-wrap: wrap; margin-top: .9rem; }
+  input[type=text], textarea { font: inherit; color: inherit; background: var(--bg);
+    border: 1px solid var(--line); border-radius: .5rem; padding: .55rem .7rem; width: 100%; }
+  textarea { min-height: 4.5rem; resize: vertical; }
+  .fb { margin-top: 1rem; padding: .8rem .9rem; border-radius: .5rem; border: 1px solid var(--line); }
+  .fb[data-ok="1"] { background: var(--ok-bg); border-color: var(--ok); }
+  .fb[data-ok="0"] { background: var(--no-bg); border-color: var(--no); }
+  .fb[data-ok="info"] { background: var(--warn-bg); border-color: var(--line); }
+  .fb b { display: block; margin-bottom: .25rem; }
+  .fb .ans { color: var(--muted); font-size: .85rem; margin-top: .5rem; }
+  .fb .src { color: var(--muted); font-size: .8rem; margin-top: .5rem; }
+  .bucket { display: grid; gap: .5rem; grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr)); margin-top: .5rem; }
+  .bucket button { text-align: center; }
+  .pool { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .6rem; }
+  .pool button { padding: .4rem .6rem; }
+  .seq { display: grid; gap: .35rem; margin: .6rem 0; }
+  .seq button { display: flex; gap: .6rem; }
+  .seq button > span:first-child { color: var(--muted); min-width: 1.2rem; }
+  .muted { color: var(--muted); font-size: .85rem; }
+  footer { color: var(--muted); font-size: .8rem; margin-top: 2rem; }
+  .summary table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+  .summary td, .summary th { text-align: left; padding: .35rem .4rem; border-bottom: 1px solid var(--line); }
+  .skip { margin-top: .9rem; }
+  .hidden { display: none; }
+</style>
+</head>
+<body>
+<header>
+  <h1 id="title"></h1>
+  <span class="muted" id="pass"></span>
+</header>
+<p class="obj" id="objective"></p>
+<div class="bar"><i id="progress"></i></div>
+<div class="meta"><span id="pos"></span><span id="score"></span></div>
+<main id="stage" aria-live="polite"></main>
+<footer id="footer"></footer>
+
+<script type="module">
+
+const KINDS = ['choice', 'multi', 'order', 'match', 'classify', 'numeric', 'text', 'explain', 'reveal'];
+
+const norm = value => String(value ?? '').trim().toLowerCase().replace(/\s+/g, ' ');
+const num = value => {
+  const n = Number(String(value ?? '').replace(/[,_\s]/g, '').replace(/%$/, ''));
+  return Number.isFinite(n) ? n : null;
+};
+
+/* ---------------------------------------------------------------- spec */
+
+/** Structural rules a spec must satisfy before it is worth publishing. */
+function validate(spec) {
+  const errors = [];
+  const warnings = [];
+  const meta = spec?.meta || {};
+  const steps = spec?.steps;
+
+  if (!meta.title) errors.push('meta.title is required (it names the page and the repo)');
+  if (!meta.objective) errors.push('meta.objective is required (what they can do afterwards)');
+  if (!meta.audience) errors.push('meta.audience is required (what they already know)');
+  if (!Array.isArray(steps) || steps.length === 0) {
+    errors.push('steps must be a non-empty array');
+    return { errors, warnings };
+  }
+
+  const ids = new Set();
+  const seen = new Set();
+  steps.forEach((step, i) => {
+    const at = `step ${i + 1}`;
+    if (!step.id) errors.push(`${at}: id is required`);
+    if (ids.has(step.id)) errors.push(`${at}: duplicate id "${step.id}"`);
+    ids.add(step.id);
+    if (!KINDS.includes(step.kind)) errors.push(`${at}: unknown kind "${step.kind}"`);
+    if (!step.prompt) errors.push(`${at}: prompt is required — one sentence, the thing they answer`);
+    if (!step.why) warnings.push(`${at}: no "why" — say what this step checks so the feedback can land`);
+    if (!step.difficulty) warnings.push(`${at}: no difficulty (1-3) — useful for balancing the set`);
+
+    if (step.kind === 'choice' || step.kind === 'multi') {
+      const options = step.options || [];
+      if (options.length < 2) errors.push(`${at}: needs at least two options`);
+      const correct = options.filter(o => o.correct);
+      if (step.kind === 'choice' && correct.length !== 1) errors.push(`${at}: choice needs exactly one correct option`);
+      if (step.kind === 'multi' && correct.length < 1) errors.push(`${at}: multi needs at least one correct option`);
+      options.forEach((o, j) => {
+        if (!o.text) errors.push(`${at}: option ${j + 1} has no text`);
+        if (!o.feedback) {
+          // The single most important rule in this file: a wrong option
+          // teaches only if the feedback says why it is wrong.
+          errors.push(`${at}: option ${j + 1} has no feedback — every option explains itself`);
+        }
+      });
+    }
+    if (step.kind === 'order') {
+      const order = step.order || step.items || [];
+      if (order.length < 3) errors.push(`${at}: order needs at least three items`);
+    }
+    if (step.kind === 'match') {
+      const pairs = step.pairs || [];
+      if (pairs.length < 3) errors.push(`${at}: match needs at least three pairs`);
+      pairs.forEach((p, j) => {
+        if (!p.left || !p.right) errors.push(`${at}: pair ${j + 1} needs both sides`);
+      });
+    }
+    if (step.kind === 'classify') {
+      if ((step.buckets || []).length < 2) errors.push(`${at}: classify needs at least two buckets`);
+      (step.items || []).forEach((item, j) => {
+        if (!item.text || !item.bucket) errors.push(`${at}: item ${j + 1} needs text and a bucket`);
+        else if (!(step.buckets || []).includes(item.bucket)) errors.push(`${at}: item ${j + 1} names an unknown bucket`);
+      });
+    }
+    if (step.kind === 'numeric' && typeof step.answer !== 'number') errors.push(`${at}: numeric needs a numeric answer`);
+    if ((step.kind === 'text' || step.kind === 'numeric') && !(step.accept || []).length && step.kind === 'text') {
+      warnings.push(`${at}: text step with no accept list accepts anything (use it only for opinion)`);
+    }
+    if ((step.kind === 'explain' || step.kind === 'reveal') && !step.reveal) {
+      errors.push(`${at}: ${step.kind} needs the model explanation in "reveal"`);
+    }
+  });
+
+  // Difficulty ramp: a set that never rises is a set that never teaches
+  // the last mile (fading guidance — Renkl & Atkinson 2003).
+  const levels = steps.map(s => Number(s.difficulty) || 0).filter(Boolean);
+  if (levels.length > 2 && levels[levels.length - 1] < Math.max(...levels)) {
+    warnings.push('the last step is not the hardest — end the set at its peak difficulty');
+  }
+  if (levels.length > 2 && !levels.some(l => l >= 2)) {
+    warnings.push('every step is difficulty 1 — add at least one that needs real work');
+  }
+
+  const explained = steps.filter(s => s.kind === 'explain').length;
+  if (steps.length >= 6 && explained === 0) {
+    warnings.push('no self-explanation step — a "why does this hold?" prompt is what turns recognition into understanding');
+  }
+  return { errors, warnings };
+}
+
+/* --------------------------------------------------------------- grade */
+
+/** Grade one answer. Returns correctness plus the feedback to show. */
+function grade(step, answer) {
+  switch (step.kind) {
+    case 'choice':
+    case 'multi': {
+      const chosen = new Set([].concat(answer ?? []).map(String));
+      const correct = new Set((step.options || []).filter(o => o.correct).map(o => o.id));
+      const same = chosen.size === correct.size && [...chosen].every(c => correct.has(c));
+      if (same) {
+        const picked = (step.options || []).find(o => o.correct && chosen.has(o.id));
+        return { correct: true, feedback: picked?.feedback || step.why || 'Correct.' };
+      }
+      const firstWrong = (step.options || []).find(o => chosen.has(o.id) && !o.correct);
+      return {
+        correct: false,
+        feedback: firstWrong?.feedback || step.hint || 'Not this one.',
+        answer: (step.options || []).filter(o => o.correct).map(o => o.text).join(', ')
+      };
+    }
+    case 'order': {
+      const truth = (step.order || step.items || []).map(x => (typeof x === 'string' ? x : x.id ?? x.text));
+      const given = [].concat(answer ?? []).map(String);
+      const hits = given.filter((g, i) => g === String(truth[i])).length;
+      return {
+        correct: hits === truth.length && given.length === truth.length,
+        feedback: hits === truth.length ? (step.feedback || 'That is the right order.') : step.feedback || `First ${hits} of ${truth.length} positions are right — the failure is further along.`,
+        answer: truth.join(' → ')
+      };
+    }
+    case 'match': {
+      const pairs = step.pairs || [];
+      const given = answer || {};
+      const wrong = pairs.filter(p => String(given[p.left]) !== String(p.right));
+      return {
+        correct: wrong.length === 0,
+        feedback: wrong.length === 0 ? (step.feedback || 'All matched.') : `Still unmatched: ${wrong.map(p => p.left).join(', ')}`,
+        answer: pairs.map(p => `${p.left} → ${p.right}`).join('; ')
+      };
+    }
+    case 'classify': {
+      const bucketOf = new Map((step.items || []).map(i => [i.text, i.bucket]));
+      const given = answer || {};
+      const wrong = [...bucketOf.entries()].filter(([text, bucket]) => String(given[text]) !== String(bucket));
+      return {
+        correct: wrong.length === 0,
+        feedback: wrong.length === 0 ? (step.feedback || 'Every item is in the right bucket.') : `Look again at: ${wrong.map(([t]) => t).join(', ')}`,
+        answer: [...bucketOf.entries()].map(([t, b]) => `${t} → ${b}`).join('; ')
+      };
+    }
+    case 'numeric': {
+      const value = num(answer);
+      if (value === null) return { correct: false, feedback: 'That is not a number.', answer: String(step.answer) };
+      const tol = Number(step.tolerance ?? 0);
+      const ok = Math.abs(value - step.answer) <= tol;
+      return {
+        correct: ok,
+        feedback: ok ? (step.feedback || 'Right.') : step.feedback || `Close is not it — check your units and the boundary case. The answer is ${step.answer}.`,
+        answer: String(step.answer)
+      };
+    }
+    case 'text': {
+      const given = norm(answer);
+      const ok = (step.accept || []).some(a => norm(a) === given);
+      return {
+        correct: ok,
+        feedback: ok ? (step.feedback || 'Right.') : step.feedback || `Compare with: ${(step.accept || [])[0] ?? step.reveal ?? ''}`,
+        answer: (step.accept || [])[0]
+      };
+    }
+    case 'explain':
+    case 'reveal':
+      return { correct: true, feedback: step.reveal, answer: null, explained: true };
+    default:
+      return { correct: false, feedback: 'Unknown step kind.', answer: null };
+  }
+}
+
+/* ------------------------------------------------------------- session */
+
+/**
+ * A session is the whole run: the steps in order, what was missed, and
+ * the second pass. Answers are graded on the *first* attempt so that a
+ * lucky guess stays visible in the summary.
+ */
+function createSession(spec, options = {}) {
+  const steps = spec.steps.map(step => ({ ...step }));
+  const byId = new Map(steps.map(step => [step.id, step]));
+  const state = {
+    order: steps.map(s => s.id),
+    index: 0,
+    pass: 1,
+    results: new Map(),      // id -> { firstTry, attempts, hints, correct }
+    misses: []
+  };
+
+  const current = () => byId.get(state.order[state.index]) || null;
+
+  function submit(stepId, answer) {
+    const step = byId.get(stepId);
+    const prior = state.results.get(stepId) || { firstTry: null, attempts: 0, hints: 0, correct: false };
+    const graded = grade(step, answer);
+    prior.attempts += 1;
+    if (prior.firstTry === null) prior.firstTry = graded.correct;
+    prior.correct = graded.correct;
+    state.results.set(stepId, prior);
+    if (!graded.correct && state.pass === 1 && !state.misses.includes(stepId)) state.misses.push(stepId);
+    return graded;
+  }
+
+  function next() {
+    if (state.index < state.order.length - 1) {
+      state.index += 1;
+      return { done: false, step: current(), pass: state.pass };
+    }
+    if (options.retryMissed !== false && state.pass === 1 && state.misses.length) {
+      state.pass = 2;
+      state.order = [...state.misses];
+      state.index = 0;
+      return { done: false, step: current(), pass: 2, review: true };
+    }
+    return { done: true, summary: summary() };
+  }
+
+  function hint(stepId) {
+    const prior = state.results.get(stepId) || { firstTry: null, attempts: 0, hints: 0, correct: false };
+    prior.hints += 1;
+    state.results.set(stepId, prior);
+    return byId.get(stepId)?.hint || 'No hint for this one — try the step before it.';
+  }
+
+  function progress() {
+    const total = state.pass === 1 ? steps.length : state.misses.length;
+    return { pass: state.pass, position: state.index + 1, total, answered: [...state.results.values()].filter(r => r.correct).length };
+  }
+
+  function summary() {
+    const rows = steps.map(step => {
+      const r = state.results.get(step.id) || { firstTry: null, attempts: 0, hints: 0 };
+      return {
+        id: step.id,
+        prompt: step.prompt,
+        difficulty: step.difficulty || 1,
+        firstTry: r.firstTry === true,
+        attempts: r.attempts,
+        hints: r.hints,
+        source: step.source || null
+      };
+    });
+    const firstTry = rows.filter(r => r.firstTry).length;
+    return {
+      total: rows.length,
+      firstTry,
+      firstTryRate: rows.length ? firstTry / rows.length : 0,
+      missed: rows.filter(r => !r.firstTry).map(r => r.id),
+      hinted: rows.filter(r => r.hints > 0).map(r => r.id),
+      rows
+    };
+  }
+
+  return { current, submit, next, hint, progress, summary, state: () => state };
+}
+
+
+const SPEC = {
+  "meta": {
+    "title": "Ise and the Great Buddha: two monuments, two claims to rule",
+    "objective": "compare how Ise's ritual renewal and Shōmu's Great Buddha turned architecture and ritual into imperial authority",
+    "audience": "students who have read Coaldrake's 'Ise Jingu' and Shōmu's proclamation; they know Shinto, Buddhism, and the Nara court in outline",
+    "mode": "general",
+    "source": "William H. Coaldrake, 'Ise Jingu,' in Architecture and Authority in Japan (Routledge, 1996), pp. 261–274; 'Proclamation of the Emperor Shōmu on the Erection of the Great Buddha Image,' in Sources of Japanese Tradition, vol. 1 (Columbia University Press, 1958), pp. 275–277."
+  },
+  "steps": [
+    {
+      "id": "why-rebuild",
+      "kind": "choice",
+      "prompt": "Ise is rebuilt on a roughly twenty-year cycle. Which explanation gets the causation right?",
+      "why": "This is the misconception the set is built to correct: decay is real, but it is not the whole reason.",
+      "difficulty": 1,
+      "hint": "Coaldrake gives three reasons, not one.",
+      "source": "Coaldrake, pp. 270–271",
+      "options": [
+        {
+          "id": "decay",
+          "text": "The buildings are made of wood and thatch, so decay forces a rebuild.",
+          "correct": false,
+          "feedback": "Decay is real — Coaldrake lists it first — but it cannot explain why the cycle is ritualized, why the state pays for it, or why the interval is twenty years rather than 'whenever the roof fails.'"
+        },
+        {
+          "id": "fused",
+          "text": "Decay, the Shinto cycle of death and rebirth, and the political need to renew imperial authority all reinforce one another.",
+          "correct": true,
+          "feedback": "Yes. Coaldrake gives three reasons — architectural, religious, political — and argues that the political imperative increasingly dominated."
+        },
+        {
+          "id": "all-shrines",
+          "text": "Shinto requires every shrine in Japan to be rebuilt every twenty years.",
+          "correct": false,
+          "feedback": "No. Coaldrake notes that other shrines also had renewal programs, but their intervals varied widely; Ise's twenty-year cycle was exceptional in its regularity and imperial sponsorship."
+        },
+        {
+          "id": "buddhist-rule",
+          "text": "Buddhist temple regulations required periodic reconstruction.",
+          "correct": false,
+          "feedback": "Buddhism is the other half of this week's reading, not the rule behind Ise's renewal. The Shoden derives from pre-Buddhist storehouse architecture, and the renewal is a Shinto ritual."
+        }
+      ]
+    },
+    {
+      "id": "model",
+      "kind": "reveal",
+      "prompt": "Here is the model before you apply it.",
+      "why": "A worked model supplies the categories; the next steps ask you to use them on evidence.",
+      "difficulty": 1,
+      "source": "Coaldrake, pp. 270–272; proclamation, pp. 276–277",
+      "reveal": "Coaldrake's three reasons: (1) architectural — cypress, thatch, and sunken pillars decay; (2) religious — rebuilding enacts the cycle of death and rebirth and restores purity; (3) political — each generation sponsors the ritual and renews its claim to rule. The argument is not that one reason is 'really' the cause. The three became fused, and the political imperative increasingly dominated. Shōmu's project is a different answer to the same problem: a 53-foot gilt-bronze Lochana Buddha, cast from the state's metal, meant to place the realm under Buddhist protection. One monument lasts by being remade; the other is meant to last by being enormous."
+    },
+    {
+      "id": "three-reasons",
+      "kind": "classify",
+      "prompt": "Sort each piece of evidence under the reason for Ise's renewal it supports.",
+      "why": "The same practice answers three different problems at once; sorting the evidence shows how they interlock.",
+      "difficulty": 2,
+      "hint": "Ask what the evidence would explain if the other two reasons disappeared.",
+      "source": "Coaldrake, pp. 264, 270–272",
+      "feedback": "Yes. The categories are not alternatives; Coaldrake's point is that they reinforce one another.",
+      "buckets": [
+        "Architectural / practical",
+        "Religious",
+        "Political"
+      ],
+      "items": [
+        {
+          "text": "Thatch and cypress deteriorate, and pillars set into the ground rot.",
+          "bucket": "Architectural / practical"
+        },
+        {
+          "text": "Rebuilding enacts the cycle of growth, decay, death, and rebirth.",
+          "bucket": "Religious"
+        },
+        {
+          "text": "Each generation sponsors the rebuilding to renew its claim to power.",
+          "bucket": "Political"
+        },
+        {
+          "text": "The renewal opens with expiatory prayers to the kami of the mountain.",
+          "bucket": "Religious"
+        },
+        {
+          "text": "The twenty-year cycle was written into imperial ritual procedure.",
+          "bucket": "Political"
+        },
+        {
+          "text": "The shrine's pillars are sunk directly into the earth.",
+          "bucket": "Architectural / practical"
+        }
+      ]
+    },
+    {
+      "id": "claim-evidence",
+      "kind": "match",
+      "prompt": "Match each claim to the evidence Coaldrake uses to support it.",
+      "why": "The claims are easy to nod along with; the evidence is what makes them arguable.",
+      "difficulty": 2,
+      "hint": "One pair is about the building's ancestry, one about access, one about the Outer Shrine, one about partial visibility, one about the meaning of monumentality.",
+      "source": "Coaldrake, pp. 261, 263–269",
+      "feedback": "These are the observable details behind the argument: ancestry, access, rank, and revelation.",
+      "pairs": [
+        {
+          "left": "Monumentality can depend on renewal, not permanence.",
+          "right": "Ise's main shrine has been rebuilt on a roughly twenty-year cycle, with historical interruptions."
+        },
+        {
+          "left": "Ise's architecture is pre-Buddhist in origin.",
+          "right": "The Shoden derives from raised-floor rice storehouses."
+        },
+        {
+          "left": "Authority is enacted through graded access.",
+          "right": "Four fences and gateways separate the inner sanctum from ordinary visitors."
+        },
+        {
+          "left": "The Outer Shrine is politically subordinate.",
+          "right": "Its torii are about half the height of the Inner Shrine's, and its renewal is less rigorous."
+        },
+        {
+          "left": "The inner sanctum is only partially revealed.",
+          "right": "A visitor can glimpse the roof finials but not the Shoden itself."
+        }
+      ]
+    },
+    {
+      "id": "trees",
+      "kind": "numeric",
+      "prompt": "One shikinen sengu consumes about how many cypress trees? Give a number.",
+      "why": "The number is part of the argument: renewal is not maintenance, it is a statewide mobilization.",
+      "difficulty": 2,
+      "hint": "Coaldrake gives a figure in the thirteen thousands.",
+      "source": "Coaldrake, p. 264",
+      "answer": 13600,
+      "tolerance": 500,
+      "feedback": "About 13,600 trees, yielding some 10,000 cubic metres of timber. A single renewal draws on forests, loggers, river transport, and hereditary craft guilds — which is why imperial patronage matters."
+    },
+    {
+      "id": "renewal-order",
+      "kind": "order",
+      "prompt": "Put one renewal cycle in order, from the first rite to the dismantling of the old shrine.",
+      "why": "The sequence shows that rebuilding is a ritual process, not a construction project with a ceremony attached.",
+      "difficulty": 2,
+      "hint": "The ritual begins in the forest, before anyone touches the building site.",
+      "source": "Coaldrake, p. 264",
+      "feedback": "That is the sequence Coaldrake describes. The ritual starts in the forest, not on the building site; the transfer of the mirror is the moment the new shrine becomes the god's dwelling; dismantling follows.",
+      "order": [
+        {
+          "id": "prayers",
+          "text": "Expiatory prayers are offered to the kami of the mountain where the cypress will be cut."
+        },
+        {
+          "id": "timber",
+          "text": "Cypress is felled and floated down the Kiso River."
+        },
+        {
+          "id": "build",
+          "text": "Craftsmen build the new shrine on the Alternate Site."
+        },
+        {
+          "id": "mirror",
+          "text": "The sacred mirror is transferred from the old shrine to the new."
+        },
+        {
+          "id": "dismantle",
+          "text": "The superseded buildings are dismantled."
+        }
+      ]
+    },
+    {
+      "id": "power-sentence",
+      "kind": "choice",
+      "prompt": "The proclamation says: 'It is We who possess the wealth of the land; it is We who possess all power in the land.' What work does that sentence do?",
+      "why": "The sentence is the hinge between Buddhist devotion and political authority; miss it and the project looks like private piety.",
+      "difficulty": 2,
+      "hint": "Read the next sentence: the vow to create the image follows immediately.",
+      "source": "Proclamation, p. 276",
+      "options": [
+        {
+          "id": "private",
+          "text": "It presents the Buddha as a private offering that the emperor can afford because he is rich.",
+          "correct": false,
+          "feedback": "It does say he can afford it, but the point is the opposite of private: the wealth and power are public claims, and the project binds the realm to them."
+        },
+        {
+          "id": "fuse",
+          "text": "It fuses the sovereign's material power with the Buddha's spiritual power, making the statue a state project.",
+          "correct": true,
+          "feedback": "Yes. The vow to build the image follows immediately, and the proclamation goes on to claim the nation's metal and to organize participation across the realm. Devotion is the vocabulary; state power is the infrastructure."
+        },
+        {
+          "id": "illegitimate",
+          "text": "It admits that the emperor has failed and has no legitimate claim to rule.",
+          "correct": false,
+          "feedback": "Shōmu does confess a lack of personal virtue, but that is a Buddhist humility topos, not an abdication. The same document commands provincial officials and claims all power in the land."
+        },
+        {
+          "id": "reject",
+          "text": "It rejects the idea that the Buddha can protect the state.",
+          "correct": false,
+          "feedback": "The opposite: the project is explicitly for peace and protection, extending the benefits to all in heaven and earth, 'even animals and plants.'"
+        }
+      ]
+    },
+    {
+      "id": "provisions",
+      "kind": "multi",
+      "prompt": "Which provisions show that the proclamation is managing money, labor, and participation — not just belief? Select all that apply.",
+      "why": "Close reading: the text administers a project, and that administration is part of how it makes authority.",
+      "difficulty": 3,
+      "hint": "Three of these are things the proclamation actually orders or permits.",
+      "source": "Proclamation, pp. 276–277",
+      "options": [
+        {
+          "id": "metal",
+          "text": "It claims 'the nation's resources of metal' for the casting.",
+          "correct": true,
+          "feedback": "Yes — the project consumes state metal, not private wealth."
+        },
+        {
+          "id": "twig",
+          "text": "It says even a twig or a handful of dirt is an acceptable offering.",
+          "correct": true,
+          "feedback": "Yes — it widens participation, making the project a national fellowship rather than an elite donation."
+        },
+        {
+          "id": "officials",
+          "text": "It tells provincial and county authorities not to harass the people with arbitrary demands.",
+          "correct": true,
+          "feedback": "Yes — it tries to control the labor extraction the project could otherwise unleash. That is administration, not just piety."
+        },
+        {
+          "id": "calumny",
+          "text": "It says the Buddha's heart is touched only when the project provokes calumny and bitterness.",
+          "correct": false,
+          "feedback": "The text says the opposite: the Buddha's heart would never be touched if calumny and bitterness were provoked. The sentence warns how the project must be run."
+        },
+        {
+          "id": "household",
+          "text": "It limits the project's benefits to the imperial household.",
+          "correct": false,
+          "feedback": "The text explicitly extends the benefits to all in heaven and earth, even animals and plants."
+        }
+      ]
+    },
+    {
+      "id": "synthesis",
+      "kind": "explain",
+      "prompt": "In 4–6 sentences: how does each project turn authority into something people can see or do, and where do the two readings disagree about what makes a monument last?",
+      "why": "This is the synthesis the two readings are paired to produce: comparison, not summary.",
+      "difficulty": 3,
+      "hint": "Name one concrete mechanism from each reading, then state the disagreement in one sentence.",
+      "source": "Coaldrake, pp. 261–274; proclamation, pp. 275–277",
+      "reveal": "Both projects make rule visible, but they disagree about what makes a monument last. At Ise, authority is renewed by repeated action: each generation rebuilds the shrine, sponsors the rituals, and passes through a graded sequence of fences and gateways. The building is not meant to survive unchanged; its power lies in the cycle, and access to the inner sanctum is itself a display of political hierarchy. Shōmu's Great Buddha takes the opposite route: it concentrates the state's wealth, metal, and labor into one enormous image, and the proclamation presents that concentration as Buddhist devotion. Yet the two are not simple opposites. Both fuse religious authority with political authority, and both depend on the ruler's control of resources and ritual. The difference is the logic of legitimation: Ise renews authority by repeating the founding act, while Tōdai-ji tries to fix it in bronze."
+    }
+  ]
+};
+
+const els = {
+  title: document.getElementById('title'),
+  objective: document.getElementById('objective'),
+  pass: document.getElementById('pass'),
+  progress: document.getElementById('progress'),
+  pos: document.getElementById('pos'),
+  score: document.getElementById('score'),
+  stage: document.getElementById('stage'),
+  footer: document.getElementById('footer')
+};
+
+let session = createSession(SPEC);
+let committed = null;     // answer collected but not submitted
+
+const el = (tag, attrs = {}, ...kids) => {
+  const node = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (k === 'text') node.textContent = v;
+    else if (k === 'html') node.innerHTML = v;
+    else if (v === true) node.setAttribute(k, '');
+    else if (v !== false && v != null) node.setAttribute(k, v);
+  }
+  kids.filter(Boolean).forEach(k => node.append(k));
+  return node;
+};
+
+function render() {
+  const step = session.current();
+  els.title.textContent = SPEC.meta.title;
+  els.objective.textContent = SPEC.meta.objective;
+  els.footer.textContent = SPEC.meta.source ? `Sources: ${SPEC.meta.source}` : '';
+  if (!step) return renderSummary();
+
+  const p = session.progress();
+  els.progress.style.width = Math.round((p.position - 1) / p.total * 100) + '%';
+  els.pos.textContent = `Step ${p.position} of ${p.total}`;
+  els.score.textContent = `${p.answered} correct so far`;
+  els.pass.textContent = p.pass === 2 ? 'Second pass — only what you missed' : '';
+
+  committed = step.kind === 'multi' ? new Set() : null;
+  let answerOf = () => null;
+  let afterRender = null;
+
+  const card = el('section', { class: 'card' });
+  card.append(el('p', { class: 'prompt', text: step.prompt }));
+  if (step.why) card.append(el('p', { class: 'why', text: step.why }));
+
+  const body = el('div');
+  card.append(body);
+  const actions = el('div', { class: 'row' });
+  card.append(actions);
+
+  switch (step.kind) {
+    case 'choice':
+    case 'multi': {
+      const opts = el('div', { class: 'opts', role: 'group' });
+      if (step.kind === 'multi') opts.dataset.multi = '1';
+      const chosen = step.kind === 'multi' ? committed : { value: null };
+      (step.options || []).forEach(opt => {
+        const b = el('button', { type: 'button', 'aria-pressed': 'false', text: opt.text });
+        b.onclick = () => {
+          if (step.kind === 'multi') {
+            const on = b.getAttribute('aria-pressed') === 'true';
+            b.setAttribute('aria-pressed', on ? 'false' : 'true');
+            on ? chosen.delete(opt.id) : chosen.add(opt.id);
+          } else {
+            [...opts.children].forEach(c => c.setAttribute('aria-pressed', 'false'));
+            b.setAttribute('aria-pressed', 'true');
+            chosen.value = opt.id;
+          }
+          submitBtn.disabled = false;
+        };
+        opts.append(b);
+      });
+      body.append(opts);
+      answerOf = () => step.kind === 'multi' ? [...chosen] : chosen.value;
+      break;
+    }
+    case 'order': {
+      const truth = (step.order || step.items || []).map(x => typeof x === 'string' ? { id: x, text: x } : x);
+      const picked = [];
+      const seq = el('div', { class: 'seq' });
+      const pool = el('div', { class: 'pool' });
+      const draw = () => {
+        seq.replaceChildren();
+        picked.forEach((item, i) => {
+          const b = el('button', { type: 'button' }, el('span', { text: String(i + 1) }), el('span', { text: item.text }));
+          b.onclick = () => { picked.splice(i, 1); draw(); };
+          seq.append(b);
+        });
+        pool.replaceChildren();
+        truth.filter(t => !picked.includes(t)).forEach(item => {
+          const b = el('button', { type: 'button', text: item.text });
+          b.onclick = () => { picked.push(item); draw(); };
+          pool.append(b);
+        });
+        submitBtn.disabled = picked.length !== truth.length;
+      };
+      body.append(el('p', { class: 'muted', text: 'Click the lines in the order they run. Click a chosen line to remove it.' }), seq, pool);
+      answerOf = () => picked.map(p => p.id);
+      afterRender = draw;
+      break;
+    }
+    case 'match': {
+      const pairs = step.pairs || [];
+      const map = {};
+      const rows = el('div', { class: 'seq' });
+      const rightOptions = [...new Set(pairs.map(p => p.right))];
+      pairs.forEach(p => {
+        const sel = el('select', {});
+        sel.append(el('option', { value: '', text: 'choose…' }));
+        rightOptions.forEach(r => sel.append(el('option', { value: r, text: r })));
+        sel.onchange = () => { map[p.left] = sel.value; submitBtn.disabled = pairs.some(x => !map[x.left]); };
+        rows.append(el('div', { class: 'row' }, el('span', { text: p.left }), sel));
+      });
+      body.append(rows);
+      answerOf = () => map;
+      break;
+    }
+    case 'classify': {
+      const map = {};
+      const pool = el('div', { class: 'pool' });
+      const buckets = el('div', { class: 'bucket' });
+      let current = null;
+      (step.items || []).forEach(item => {
+        const b = el('button', { type: 'button', text: item.text });
+        b.onclick = () => { current = item.text; [...pool.children].forEach(c => c.setAttribute('aria-pressed', 'false')); b.setAttribute('aria-pressed', 'true'); };
+        pool.append(b);
+      });
+      (step.buckets || []).forEach(bucket => {
+        const target = el('button', { type: 'button', text: bucket });
+        target.onclick = () => {
+          if (!current) return;
+          map[current] = bucket;
+          [...pool.children].filter(c => c.textContent === current).forEach(c => { c.disabled = true; c.setAttribute('aria-pressed', 'false'); });
+          current = null;
+          submitBtn.disabled = Object.keys(map).length !== (step.items || []).length;
+        };
+        buckets.append(target);
+      });
+      body.append(el('p', { class: 'muted', text: 'Pick an item, then pick the bucket it belongs in.' }), pool, buckets);
+      answerOf = () => map;
+      break;
+    }
+    case 'numeric':
+    case 'text': {
+      const input = el('input', { type: 'text', inputmode: step.kind === 'numeric' ? 'decimal' : 'text', autocomplete: 'off' });
+      input.oninput = () => { submitBtn.disabled = input.value.trim() === ''; };
+      body.append(input);
+      answerOf = () => input.value;
+      break;
+    }
+    case 'explain': {
+      const ta = el('textarea', { placeholder: 'Say it in your own words before you look…' });
+      ta.oninput = () => { submitBtn.disabled = ta.value.trim() === ''; };
+      body.append(el('p', { class: 'muted', text: 'Answer in your own words. Nothing is graded here — the act of producing it is the point.' }), ta);
+      answerOf = () => ta.value;
+      break;
+    }
+    case 'reveal': {
+      break;
+    }
+  }
+
+  const label = step.kind === 'explain' ? 'Compare with the model answer' : step.kind === 'reveal' ? 'Show me' : 'Check';
+  const submitBtn = el('button', { type: 'button', text: label, disabled: step.kind !== 'reveal' });
+  actions.append(submitBtn);
+  let hintBtn = null;
+  if (step.hint) {
+    hintBtn = el('button', { type: 'button', text: 'Hint' });
+    hintBtn.onclick = () => {
+      hintBtn.disabled = true;
+      card.append(el('div', { class: 'fb', 'data-ok': 'info' }, el('b', { text: 'Hint' }), el('span', { text: session.hint(step.id) })));
+    };
+    actions.append(hintBtn);
+  }
+
+  submitBtn.onclick = () => {
+    const graded = session.submit(step.id, answerOf());
+    submitBtn.disabled = true;
+    hintBtn && (hintBtn.disabled = true);
+    [...card.querySelectorAll('button:not(.next), input, select, textarea')].forEach(n => n.disabled = true);
+
+    const fb = el('div', { class: 'fb', 'data-ok': graded.correct ? '1' : '0' });
+    fb.append(el('b', { text: graded.correct ? '✓ ' + (step.kind === 'explain' ? 'Model answer' : 'Correct') : '✗ Not yet' }));
+    fb.append(el('span', { text: graded.feedback || '' }));
+    if (!graded.correct && graded.answer) fb.append(el('div', { class: 'ans', text: `The answer: ${graded.answer}` }));
+    if (step.source) fb.append(el('div', { class: 'src', text: `Source: ${step.source}` }));
+    if (step.explainPrompt) fb.append(el('div', { class: 'ans', text: step.explainPrompt }));
+    card.append(fb);
+
+    const nextBtn = el('button', { class: 'next', type: 'button', text: 'Next', autofocus: true });
+    nextBtn.onclick = () => { const r = session.next(); r.done ? renderSummary() : render(); };
+    actions.replaceChildren(nextBtn);
+    nextBtn.focus();
+    els.score.textContent = `${session.progress().answered} correct so far`;
+  };
+
+  els.stage.replaceChildren(card);
+  afterRender?.();
+}
+
+function renderSummary() {
+  const s = session.summary();
+  els.progress.style.width = '100%';
+  els.pos.textContent = 'Done';
+  els.score.textContent = '';
+  els.pass.textContent = '';
+  const card = el('section', { class: 'card summary' });
+  card.append(el('h2', { text: `${s.firstTry} of ${s.total} right on the first try` }));
+  const advice = s.firstTryRate >= 0.8
+    ? 'That is the level to walk in with. Re-run this tomorrow rather than tonight — the gap is what makes it stick.'
+    : s.firstTryRate >= 0.5
+      ? 'The misses below are the whole exercise. Reread the hint, then re-run in a day.'
+      : 'Most of it did not land yet. Do not reread the whole thing: work the missed items below, then ask about the ones still unclear.';
+  card.append(el('p', { class: 'muted', text: advice }));
+
+  const table = el('table');
+  table.append(el('tr', {}, el('th', { text: 'Step' }), el('th', { text: 'First try' }), el('th', { text: 'Hints' })));
+  s.rows.forEach(r => {
+    table.append(el('tr', {},
+      el('td', { text: r.prompt }),
+      el('td', { text: r.firstTry ? '✓' : '✗' }),
+      el('td', { text: r.hints ? String(r.hints) : '' })));
+  });
+  card.append(table);
+
+  if (s.missed.length) {
+    const again = el('button', { type: 'button', text: `Run the ${s.missed.length} missed step(s) again` });
+    again.onclick = () => {
+      session = createSession({ ...SPEC, steps: SPEC.steps.filter(x => s.missed.includes(x.id)) }, { retryMissed: false });
+      render();
+    };
+    card.append(el('div', { class: 'row' }, again));
+  }
+
+  const answers = el('details', { class: 'skip' });
+  answers.append(el('summary', { text: 'Show every answer (for review after class)' }));
+  SPEC.steps.forEach(step => {
+    const line = el('p', { class: 'muted' });
+    const truth = step.kind === 'choice' || step.kind === 'multi'
+      ? (step.options || []).filter(o => o.correct).map(o => o.text).join(', ')
+      : step.kind === 'numeric' ? String(step.answer)
+        : step.kind === 'text' ? (step.accept || []).join(' / ')
+          : step.reveal || (step.order || []).map(o => o.text || o).join(' → ');
+    line.textContent = `${step.prompt} — ${truth}`;
+    answers.append(line);
+  });
+  card.append(answers);
+  els.stage.replaceChildren(card);
+}
+
+render();
+</script>
+</body>
+</html>
